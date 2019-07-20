@@ -22,13 +22,13 @@
 
 ## HDFS架构图
 
-![HDFS framework](pic\Picture1.png)
+![image](pic/HDFS架构图.png)
 
 颜色一样的表示为副本
 
 HDFS client 与NameNode交互之后，会与DataNode进行交互
 
-![](pic\Picture2.png)
+![](pic/HDFS存储模型图.png)
 
 存储50GB的数据
 
@@ -71,7 +71,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
   * 根据配置文件设置edits log大小 fs.checkpoint.size 规定edits文件的最大值默认是64MB  
 
-  ![](pic\Picture3.jpg)
+  ![](pic/Picture3.jpg)
 
  ## DataNode
 
