@@ -71,7 +71,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
   * 根据配置文件设置edits log大小 fs.checkpoint.size 规定edits文件的最大值默认是64MB  
 
-  ![](pic/Picture3.jpg)
+  ![](pic/SNN解决数据持久化.jpg)
 
  ## DataNode
 
@@ -106,6 +106,8 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
   * 仅支持append
 
 ## Block的副本放置策略
+
+![](pic/Block放置策略.png)
 
 * 第一个副本：放置在上传文件的DN（放在本地，rackA）；如果在集群外提交，则随机挑选一台磁盘不太满，CPU不太忙的节点
 
