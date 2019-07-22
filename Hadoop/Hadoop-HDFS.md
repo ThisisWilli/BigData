@@ -22,13 +22,13 @@
 
 ## HDFS架构图
 
-![image](pic/HDFS架构图.png)
+![image](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS%E6%9E%B6%E6%9E%84%E5%9B%BE.png)
 
 颜色一样的表示为副本
 
 HDFS client 与NameNode交互之后，会与DataNode进行交互
 
-![](pic/HDFS存储模型图.png)
+![](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS%E5%AD%98%E5%82%A8%E6%A8%A1%E5%9E%8B%E5%9B%BE.png)
 
 存储50GB的数据
 
@@ -71,7 +71,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
   * 根据配置文件设置edits log大小 fs.checkpoint.size 规定edits文件的最大值默认是64MB  
 
-  ![](pic/SNN解决数据持久化.jpg)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/SNN%E8%A7%A3%E5%86%B3%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96.jpg](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/SNN解决数据持久化.jpg)
 
  ## DataNode
 
@@ -107,7 +107,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
 ## Block的副本放置策略
 
-![](pic/Block放置策略.png)
+![](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/Block放置策略.png)
 
 * 第一个副本：放置在上传文件的DN（放在本地，rackA）；如果在集群外提交，则随机挑选一台磁盘不太满，CPU不太忙的节点
 
@@ -117,7 +117,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
 ## HDFS写流程
 
-![](pic/HDFS写流程.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS%E5%86%99%E6%B5%81%E7%A8%8B.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS写流程.png)
 
 * Client：
   * 切分文件Block
@@ -134,7 +134,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
 ## HDFS读流程
 
-![](pic/HDFS读流程.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS%E8%AF%BB%E6%B5%81%E7%A8%8B.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS读流程.png)
 
 * Client
   * 和NN获取一部分Block副本位置列表
@@ -142,15 +142,43 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
   * 在Block副本列表中安距离择优选用
   * MD5验证数据完整性
 
+## HDFS文件权限  POSIX标准（可以指操作系统接口）
+
+* 与Linux文件权限类似
+  * r:read,w:write,x:excute
+  * 权限x对于文件忽略，对于文件夹表示是否允许访问其内容
+* 如果Linux系统用户zhangsan使用hadoop命令创建一个文件，那么这个文件在HDFS中owner就是zhangsan。
+* HDFS的权限目的：阻止误操作，但不绝对。HDFS相信，你告诉我你是谁，我就认为你是谁。
+
+## 安全模式
+
+* namenode启动的时候，首先将映像文件(fsimage)载入内存，并执行编辑日志(edits)中的各项操作。最后达到恢复数据的效果。
+* 一旦在内存中成功建立文件系统元数据的映射，则创建一个新的fsimage文件(这个操作不需要SecondaryNameNode)和一个空的编辑日志。
+* 此刻namenode运行在安全模式。即namenode的文件系统对于客服端来说是只读的。(显示目录，显示文件内容等。写、删除、重命名都会失败，尚未获取动态信息)。
+* 在此阶段Namenode收集各个datanode的报告，当数据块达到最小副本数以上时，会被认为是“安全”的， 在一定比例（可设置）的数据块被确定为“安全”后，再过若干时间，安全模式结束
+* 当检测到副本数不足的数据块时，该块会被复制直到达到最小副本数，系统中数据块的位置并不是由namenode维护的，而是以块列表形式存储在datanode中。
+
+## HDFS各个角色总结
+
+* namenode
+  * 数据元数据
+  * 内存存储，不会有磁盘交换
+  * 持久化（fsimage，edits log）
+    * 不会持久化block的位置信息
+  * block：偏移量，因为block不可以调整大小，hdfs，不支持修改文件
+    * 偏移量不会改变
+  * datanode
+    * block块
+    * 磁盘
+    * 面向文件，大小一样，不能调整
+    * 副本数，调整，（备份，高可用，容错/可以调整很多个，为了计算向数据移动）
+  * SN
+  * NN&DN
+    * 心跳机制
+    * DN向NN汇报block信息
+    * 安全模式
+  * client
 
 
-
-
-
-
-
-
-
-
-
+​    
 
