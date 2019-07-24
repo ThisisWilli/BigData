@@ -5,6 +5,7 @@
   * ``` rpm -i jdk-7u67-linux-x64.rpm  ```
   * 配置java环境变量
     * ``` vi + /etc/profile ``` 在末尾加上 ``` export JAVA_HOME=/usr/java/jdk1.7.0_67```和``` export PATH=$PATH:$JAVA_HOME/bin```
+    * ```.   /etc/profile ```           
     * jps验证有无安装成功
 
 * 配置密钥
