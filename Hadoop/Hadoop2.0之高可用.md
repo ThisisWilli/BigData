@@ -16,7 +16,7 @@
 
 ## Hadoop 1.x与Hadoop 2.x
 
-![](pic\hadoop1与hadoop2的区别.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop1%E4%B8%8Ehadoop2%E7%9A%84%E5%8C%BA%E5%88%AB.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop1与hadoop2的区别.png)
 
 * Hadoop 2.x由HDFS、MapReduce和YARN三个分支构成；
 
@@ -43,7 +43,7 @@
 
 ## Hadoop2.0主从架构(HA 高可用机制)
 
-![](pic\Hadoop2.0主从架构图.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/Hadoop2.0%E4%B8%BB%E4%BB%8E%E6%9E%B6%E6%9E%84%E5%9B%BE.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/Hadoop2.0主从架构图.png)
 
 * 主备NameNode
 * 解决单点故障（属性，位置）
@@ -61,7 +61,7 @@
 
 ## HDFS  **2.x**  Federation
 
-![](pic\HDFS联邦.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS%E8%81%94%E9%82%A6.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/HDFS联邦.png)
 
 * 通过多个Namenode/Namespace把元数据的存储和管理分散到多个节点中，使到Namenode/Namespace可以通过增加机器来进行水平扩展。
 * 能把单个Namenode的负载分散到多个节点中，在HDFS数据规模较大的时候不会也降低HDFS的性能。可以通过多个Namespace来隔离不同类型的应用，把不同类型应用的HDFS元数据的存储和管理分派到不同的Namenode中。
@@ -372,9 +372,9 @@
   node02: starting zkfc, logging to /opt/sxt/hadoop-2.6.5/logs/hadoop-root-zkfc-node02.out
   ```
 
-* ![](pic\高可用node01.PNG)
+* ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E9%AB%98%E5%8F%AF%E7%94%A8node01.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/高可用node01.PNG)
 
-  ![](pic\高可用node02.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E9%AB%98%E5%8F%AF%E7%94%A8node02.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/高可用node02.PNG)
 
 * 关闭zkfc进程，观察NameNode01，NameNode02的变化
 
