@@ -1,4 +1,4 @@
-# idea远程连接hadoop
+# idea远程连接hadoop进行文件操作
 
 部署完高可用集群之后，尝试idea远程连接hadoop进行操作
 
@@ -8,11 +8,11 @@
 
 * 配置环境变量，先系统变量中创建HADOOP_HOME
 
-  ![](pic\创建HADOOP_HOME.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E5%88%9B%E5%BB%BAHADOOP_HOME.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/创建HADOOP_HOME.PNG)
 
 * 创建HADOOP_USER_NAME，名称为集群中的登录名称
 
-  ![](pic\创建HADOOP_USER_NAME.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E5%88%9B%E5%BB%BAHADOOP_USER_NAME.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/创建HADOOP_USER_NAME.PNG)
 
 * 在系统变量的Path中添加%HADOOP_HOME%/bin
 
@@ -20,7 +20,7 @@
 
 * 在命令行中输入hdfs和hadoop，检测是否安装成功
 
-  ![](pic\hadoop是否安装成功.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop%E6%98%AF%E5%90%A6%E5%AE%89%E8%A3%85%E6%88%90%E5%8A%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop是否安装成功.PNG)
 
 ## 在idea中配置hadoop
 
@@ -28,11 +28,11 @@
 
 * idea中创建maven项目
 
-  ![](pic\创建maven工程.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E5%88%9B%E5%BB%BAmaven%E5%B7%A5%E7%A8%8B.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/创建maven工程.PNG)
 
 * 工程创建完成之后，File->Settings-Plugin->点击右上角的设置->Install plugin from disk
 
-  ![](pic\安装plugins.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E5%AE%89%E8%A3%85plugins.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/安装plugins.PNG)
 
 * 重启idea，菜单栏中会出现hadoop选项
 
@@ -42,11 +42,11 @@
 
 * 点击idea上方菜单栏中的hadoop进入设置
 
-  ![](pic\设置hadoop文件系统.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E8%AE%BE%E7%BD%AEhadoop%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/设置hadoop文件系统.PNG)
 
 * 确定之后左边会出现hadoop
 
-  ![](pic\hadoop侧边栏.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop%E4%BE%A7%E8%BE%B9%E6%A0%8F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/hadoop侧边栏.PNG)
 
 * 进行文件操作，代码具体如下，可用junit进行调试，并在hadoop插件中查看hdfs文件系统
 
