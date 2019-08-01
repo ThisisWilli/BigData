@@ -103,7 +103,7 @@
 
 * `[root@node01 mapreduce]# hadoop jar hadoop-mapreduce-examples-2.6.5.jar wordcout /user/root/test.txt /wordcount`
 
-  ![](pic\resourcemanager中查看.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/resourcemanager%E4%B8%AD%E6%9F%A5%E7%9C%8B.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/resourcemanager中查看.PNG)
 
 * `[root@node01 mapreduce]# hdfs dfs -cat /wordcount/part-r-00000`
 
@@ -119,7 +119,7 @@
 
 * `[root@node01 ~]# cd /opt/sxt/hadoop-2.6.5/etc/hadoop`，将4个xml文件放入idea项目中的resources中
 
-  ![](pic\获取配置文件.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E8%8E%B7%E5%8F%96%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/获取配置文件.PNG)
 ## 启动集群
 
 * 启动zookeeper，所有node
@@ -260,7 +260,7 @@ public class MyReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 * File->Project Structure->Artifacts->+->选择JAR
 
-  ![](pic\打包成jar文件.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E6%89%93%E5%8C%85%E6%88%90jar%E6%96%87%E4%BB%B6.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/打包成jar文件.PNG)
 
 * Build->Build Artifacts选择build，在工程的out文件夹中可以看到生成的jar包
 
