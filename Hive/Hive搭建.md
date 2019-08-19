@@ -122,7 +122,7 @@
 
 * 在resourcemanager节点中查看mr任务
 
-  ![](pic\在resourceManage节点中查看hive任务.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hive/pic/%E5%9C%A8resourceManage%E8%8A%82%E7%82%B9%E4%B8%AD%E6%9F%A5%E7%9C%8Bhive%E4%BB%BB%E5%8A%A1.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hive/pic/在resourceManage节点中查看hive任务.PNG)
 
 * 查看表中数据`hive> select * from tbl;`
 
