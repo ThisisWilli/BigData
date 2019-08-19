@@ -4,7 +4,7 @@
 
 好友关系图如下图所示
 
-![](pic\好友推荐图.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/%E5%A5%BD%E5%8F%8B%E6%8E%A8%E8%8D%90%E5%9B%BE.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hadoop/pic/好友推荐图.png)
 
 转化为文字之后为，即为输入数据
 
