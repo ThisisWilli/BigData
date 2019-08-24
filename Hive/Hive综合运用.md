@@ -1,6 +1,6 @@
 # Hive综合运用
 
-## Hive DML语句
+## Hive DML语句，元数据服务？
 
 * 删除表psn中的数据`hive> truncate table psn;`,动态分区进行建表
 
@@ -145,6 +145,38 @@ OK
 Time taken: 0.052 seconds, Fetched: 22 row(s)
 ```
 
+## Hive Beeline
 
+* Beeline 要与HiveServer2配合使用
+
+* 服务端启动hiveserver2
+
+* 客户的通过beeline两种方式连接到hive
+  * 1、beeline -u jdbc:hive2://localhost:10000/default -n root
+  * 2、beeline 
+  * beeline> !connect jdbc:hive2://<host>:<port>/<db>;auth=noSasl root 123
+  
+* 默认 用户名、密码不验证
+
+### 启动HiveServer2
+
+hiveserver2提供了jdbc的一种访问方式，在公司内推荐使用hiveserver2，web形式访问
+
+* `[root@node03 ~]# hiveserver2`
+
+* `[root@node04 ~]# beeline`
+
+* 在node04中连接数据库，密码验证可以随便写，但是不能不写
+
+  ```
+  beeline> !connect jdbc:hive2://node03:10000/default root 123
+  Connecting to jdbc:hive2://node03:10000/default
+  Connected to: Apache Hive (version 1.2.1)
+  Driver: Hive JDBC (version 1.2.1)
+  Transaction isolation: TRANSACTION_REPEATABLE_READ
+  0: jdbc:hive2://node03:10000/default> 
+  ```
+
+  
 
   
