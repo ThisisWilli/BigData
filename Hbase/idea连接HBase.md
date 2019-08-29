@@ -290,7 +290,7 @@ ROW                                    COLUMN+CELL
 
   查询成功
 
-  ![](pic\get方法查询成功.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/get%E6%96%B9%E6%B3%95%E6%9F%A5%E8%AF%A2%E6%88%90%E5%8A%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/get方法查询成功.PNG)
 
 * scan方法
 
@@ -328,7 +328,7 @@ ROW                                    COLUMN+CELL
 
   查询成功
 
-  ![](pic\scan方法查询成功.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan%E6%96%B9%E6%B3%95%E6%9F%A5%E8%AF%A2%E6%88%90%E5%8A%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan方法查询成功.PNG)
 
 
 

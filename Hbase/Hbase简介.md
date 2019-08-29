@@ -54,7 +54,7 @@
 
 ## HBase架构
 
-![](pic\HBase架构.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/HBase%E6%9E%B6%E6%9E%84.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/HBase架构.png)
 
 * HBase那块中少一个blockcache,读缓存,满了之后会有淘汰机制
 * 注意都和写
@@ -98,7 +98,7 @@
 
 ### HRegion
 
-![](pic\HRegion.png)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/HRegion.png](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/HRegion.png)
 
 * HRegion是HBase中分布式存储和负载均衡的最小单元。最小单元就表示不同的HRegion可以分布在不同的 HRegion server上。
 * HRegion由一个或者多个Store组成，每个store保存一个columns family。
