@@ -85,7 +85,7 @@
 
 * 执行Test单元，在hbase shell中查看数据，显示插入成功
 
-  ![](pic\查看一万条插入数据.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/%E6%9F%A5%E7%9C%8B%E4%B8%80%E4%B8%87%E6%9D%A1%E6%8F%92%E5%85%A5%E6%95%B0%E6%8D%AE.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/查看一万条插入数据.PNG)
 
 ## 查看数据
 
@@ -126,7 +126,7 @@
 
   查询成功
 
-  ![](pic\scan2查询成功.PNG)
+  ![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan2%E6%9F%A5%E8%AF%A2%E6%88%90%E5%8A%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan2查询成功.PNG)
 
 ### 用get方法实现查询
 
@@ -158,4 +158,4 @@
 
 查询成功
 
-![](pic\scan1查询成功.PNG)
+![https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan1%E6%9F%A5%E8%AF%A2%E6%88%90%E5%8A%9F.PNG](https://raw.githubusercontent.com/ThisisWilli/BigData/master/Hbase/pic/scan1查询成功.PNG)
