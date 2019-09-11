@@ -633,7 +633,7 @@ static String valueOf(primitive data type x)
 
 * 数组中的方法及描述
 
-  ```
+  ```scheme
   序号	方法和描述
   1	
   def apply( x: T, xs: T* ): Array[T]
@@ -740,7 +740,7 @@ static String valueOf(primitive data type x)
     flatMapResult.foreach { println }
   ```
 
-* 可变长List
+* **可变长List**
 
   ```scala
    /**
