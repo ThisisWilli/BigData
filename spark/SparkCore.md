@@ -153,8 +153,11 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
   }
   ```
 
-
 ### Spark中的Java算子
+
+map和flatmap的区别
+
+![](pic\map和flatmap的区别.png)
 
 * filter算子
 
@@ -466,8 +469,9 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
   }
   ```
 
-
 ### Spark中的持久化算子
+
+持久化的单位是partition
 
 #### cache
 
@@ -504,7 +508,58 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
 
 #### persist
 
-* 可以手动指定持久化级别
+* **可以手动指定持久化级别**
+* MEMORY_ONLY
+* MEMORY_ONLY_SER ：序列化
+* MEMORY_AND_DISK
+* MEMORY_AND_DISK_SER
+* "_2"是由副本
+* 尽量少使用DISK_ONLY级别
+
+#### cache和persist的注意
+
+* cache，persist，checkpoint都是懒执行，最小持久化单位是partition
+* cache和persist之后可以直接赋值给一个值，下次直接使用找个值就是使用持久化的数据
+* 如果采用第二种方式，后面不能紧跟action算子
+* cache和persist的数据，当application执行完成之后会自动清除
+
+#### checkpoint
+
+* 将数据直接持久化到指定的目录，当lineage(计算逻辑)非常复杂，可以尝试使用checkpoint，checkpoint还可以切断RDD的关系，相当于在多个连续，连接的RDD之间添加一个checkpoint，这些checkpoint中的数据在计算完成之后会重新进行计算，然后重新扔回到checkpoint节点中
+
+* 特殊场景使用checkpoint，**对RDD使用checkpoint要慎重**，因为要放进磁盘
+
+* checkpoint要指定目录，可以将数据持久化到指定目录中，**当application执行完成之后，这个目录中的数据不会被清除** 
+
+* checkpoint执行流程
+  * 当sparkjob执行完成之后，spark会**从后往前**回溯，找到checkpointRDD做标记
+  * 当回溯完成之后，Spark框架会重新启动一个job，计算标记的RDD的数据，放入指定的checkpoint中
+  * 数据计算完成之后，放入目录之后，会切断RDD之间的依赖关系，当SparkApplication执行完成之后，数据目录中的数据不会被清除
+  * 优化：对哪个RDD进行checkpoint，最好先cache一下，这样回溯完成之后再计算这个checkpointRDD数据的时候可以直接在内存中拿到放到指定的目录中
+  
+  ```scala
+  import org.apache.spark.rdd.RDD
+  import org.apache.spark.storage.StorageLevel
+  import org.apache.spark.{SparkConf, SparkContext}
+  object CacheTest {
+    def main(args: Array[String]): Unit = {
+      val conf = new SparkConf().setMaster("local").setAppName("cache")
+      val sc = new SparkContext(conf)
+      sc.setLogLevel("Error")
+      sc.setCheckpointDir("./data/ck")
+      //var rdd: RDD[String] = sc.textFile("D:\\persistData.txt")
+      var rdd: RDD[String] = sc.textFile("./data/data2.txt")
+      rdd.cache()
+      rdd.checkpoint()
+      rdd.count()
+       sc.stop()
+    }
+   }
+  ```
+  
+  
+
+
 
 
 
