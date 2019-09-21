@@ -4,7 +4,7 @@
 
 ### 简介
 
-![](pic\Spark核心RDD.jpg)
+![](pic\Spark核心RDD.png)
 
 * RDD之间的依赖关系可以让他们相互还原
 * 分区器难理解
@@ -36,20 +36,120 @@ Driver和Worker是启动在节点上的进程，运行在JVM中的进程。
 
 ## Spark中的算子
 
-### Transformation转换算子
+Spark算子大方向来说可以分为以下两类transformation算子(也叫**懒加载执行**)和action算子，从小方向细分来说，可以分成以下三类
 
-#### 概念
+* Value数据类型的transformation算子，这种变换并不触发提交作业，针对处理的数据项是value型的数据
+* key-value数据类型的transformation算子，这种变换并不触发提交作业，针对处理的数据项是key-value型的数据对
+* action算子，这类算子会触发SparkContext提交Job作业
 
-Transformations类算子是一类算子（函数）叫做转换算子，如map,flatMap,reduceByKey等。Transformations算子是延迟执行，也叫**懒加载执行**。
+### Value数据类型的Transformation算子
 
-#### Transformation类算子
+#### 输入分区与输出分区一对一类型
+
+* map：将一个RDD中的每个数据项，通过map中的函数映射变为一个新的元素。特点：输入一条，输出一条数据。
+
+  ![](pic\map算子示意图.png)
+  
+* flatMap：将原来 RDD 中的每个元素通过函数 f 转换为新的元素，并将生成的 RDD 的每个集合中的元素合并为一个集合，内部创建 FlatMappedRDD(this，sc.clean(f))        图 2表示RDD的一个分区 ，进 行 flatMap函 数 操 作，flatMap 中 传 入 的 函 数 为 f:T->U， T和 U 可以是任意的数据类型。将分区中的数据通过用户自定义函数 f 转换为新的数据。**外部大方框可以认为是一个 RDD 分区**，**小方框代表一个集合**。 V1、 V2、 V3 在一个集合作为 RDD 的一个数据项，可能存储为数组或其他容器，转换为V’1、 V’2、 V’3 后，**将原来的数组或容器结合拆散**，拆散的数据形成为 RDD 中的数据项
+
+  ![](pic\flatmap算子示意图.png)
+  
+* mapPartitions：mapPartitions 函数获取到**每个分区的迭代器**，在函数中通过这个分区整体的迭代器对整个分区的元 素进行操作。内部实现是生 成MapPartitionsRDD。图中方框表示一个RDD分区
+
+  ![](pic\mapPartition算子示意图.png)
+  
+* glom：将每个分区形成一个数组，内部实现是返回的GlommedRDD
+
+  ![](pic\glom算子示意图.png)
+
+#### 输入分区与输出分区多对一型
+
+* union：**需要保证两个RDD元素的数据类型相同**，返回的RDD数据类型和被合并的RDD数据元素类型相同，**并不进行去重操作**，保存所有元素，想去重可以使用distinct()，**使用++符号相当于union函数操作**左侧大方框代表两个 RDD，大方框内的小方框代表 RDD 的分区。右侧大方框代表合并后的 RDD，大方框内的小方框代表分区。含有V1、V2、U1、U2、U3、U4的RDD和含有V1、V8、U5、U6、U7、U8的RDD合并所有元素形成一个RDD。V1、V1、V2、V8形成一个分区，U1、U2、U3、U4、U5、U6、U7、U8形成一个分区。
+
+  ![](pic\笛卡尔运算原理.png)
+
+  ![](pic\union算子示意图.png)
+
+* cartesian:对两个RDD内中的所有元素进行笛卡尔积操作，操作后，内部实现返回CartesianRDD。图中左侧两个方框代表两个RDD，大方框内的小方框代表RDD分区，右侧大方框代表合并后的RDD，方框内的小方框代表分区
+
+  ![](pic\cartesian算子示意图.png)
+
+#### 输入分区与输出分区多对多型
+
+* groupby：将元素通过函数生成相应的key，数据就转化成key-value格式，之后将key相同的元素分为一组，函数实现如下：
+
+  (1)将用户函数预处理`val cleanF = sc.clean(f)`
+
+  (2)对数据map进行函数操作，最后在进行groupbykey分组操作`this.map(t => (cleanF(t), t)).groupByKey(p)`
+
+  ![](pic\groupby算子示意图.png)
+
+#### 输出分区为输入分区子集型
 
 * filter：过滤符合条件的记录数，true保留，false过滤掉。
-* map：将一个RDD中的每个数据项，通过map中的函数映射变为一个新的元素。特点：输入一条，输出一条数据。
-* flatMap：先map后flat。与map类似，每个输入项可以映射为0到多个输出项。
+
+  ![](pic\sample算子示意图.png)
+  
+* distinct：distinct将RDD中的元素进行去重操作，
+
+  ![](pic\distinct算子示意图.png)
+
+* subtract：subtract相当于集合的差操作，RDD1去除RDD1和RDD2交集中的所有元素
+
+  ![](pic\subtract算子示意图.png)
+
 * sample：随机抽样算子，根据传进去的小数按比例进行又放回或者无放回的抽样。
-* reduceByKey：将相同的Key根据相应的逻辑进行处理。
+
+  ![](pic\sample算子示意图.png)
+
+* takeSample:按照采样个数进行采样，返回结果不再是RDD，而是相当于对采样后的数据进行collect()，返回结果的集合为单机的数组
+
+  ![](pic\takeSample算子示意图.png)
+
+#### Cache型
+
+* Cache算子：cache 将 RDD 元素从磁盘缓存到内存。 相当于 persist(MEMORY_ONLY) 函数的功能。
+
+  ![](pic\cache算子的示意图.png)
+
+* persist算子
+
+### Key-Value数据类型的Transformation算子
+
+#### 输入分区与输出分区一对一
+
+* mapValues算子：针对(Key, Value)型数据中的Value进行Map操作，**而不对Key进行处理**，a=>a+2 代表对 (V1,1) 这样的 Key Value 数据对，数据只对 Value 中的 1 进行加 2 操作，返回结果为 3
+
+  ![](pic\mapValue算子示意图.png)
+
+#### 对单个RDD或两个RDD聚集
+
+* combineByKey：相当于将元素为 (Int， Int) 的 RDD 转变为了 (Int， Seq[Int]) 类型元素的 RDD。图 16中的方框代表 RDD 分区。如图，通过 combineByKey， 将 (V1,2)， (V1,1)数据合并为（ V1,Seq(2,1)）。
+
+  ![](pic\combineByKey算子示意图.png)
+
+* reduceByKey：将相同的Key根据相应的逻辑进行处理，比如说将两个值合并成一个值
+
+  ![](pic\reduceByKey算子示意图.png)
+
+* partitionBy：是对**RDD进行分区操作**
+
+  ![](pic\partitionBy算子示意图.png)
+
+* Cogroup：将两个RDD进行协同划分，对在两个RDD中的Key-value类型的元素，每个RDD相同key的元素分别聚合成一个集合，并且返回两个RDD中对应Key的元素集合的迭代。图中大方框代表RDD，小方框代表RDD中的分区，将RDD1中的数据和RDD2中的数据进行合并
+
+  ![](pic\Cogroup算子示意图.png)
+
+#### 连接
+
+* join：join对两个需要连接的RDD进行cogroup函数操作，将**相同key的数据**能够放到同一个分区，在coGroup操作之后形成的新RDD对每个key下的元素进行**笛卡尔积的操作**，返回的结果再展平，对应key下的所有元组形成一个集合。最后返回RDD
+
+  ![](pic\join算子示意图.png)
+
+* leftOutJoin和rightOutJoin：LeftOutJoin（左外连接）和RightOutJoin（右外连接）相当于在join的基础上**先判断一侧的RDD元素是否为空**，如果为空，则填充为空。 如果不为空，则将数据进行连接运算，并返回结果。
+
 * sortByKey/sortBy：作用在K,V格式的RDD上，对key进行升序或者降序排序。
+
 * 特点：将RDD类型转化为RDD类型
 
 ### Action行动算子
@@ -58,14 +158,34 @@ Transformations类算子是一类算子（函数）叫做转换算子，如map,f
 
 Action类算子也是一类算子（函数）叫做行动算子，如foreach,collect，count等。Transformations类算子是延迟执行，Action类算子是触发执行。一个application应用程序中有几个Action类算子执行，就有几个job运行。
 
-#### Action类算子
+#### 无输出
+
+* foreach：循环遍历数据集中的每个元素，运行相应的逻辑。
+
+  ![](pic\foreach算子示意图.png)
+
+#### HDFS
+
+* saveAsTextFile：函数将数据输出，存储到HDFS的指定目录中
+* saveAsObjectFile：将分区中的每10个元素组成一个Array，然后将Array序列化，映射成(Null，BytesWritable(Y)，就是将RDD的每个分区存储为HDFS上的一个Block
+
+#### Scala集合和数据类型
+
+* collect：将计算结果回收到Driver端。，已经过时不推荐使用
+
+* collectAsMap：collectAsMap对(K，V)型的RDD数据**返回一个单机HashMap**。 对于重复K的RDD元素，后面的元素覆盖前面的元素。
+
+  ![](pic\collectAsMap算子示意图.png)
+
+* reduceByKeyLocally：实现的是先reduce再collectAsMap的功能，先对RDD的整体进行reduce操作，然后收集所有结果返回一个HashMap
 
 * count：返回数据集中的元素数。会在结果计算完成后回收到Driver端。
+
 * take(n)：返回一个包含数据集前n个元素的集合。
+
 * first：first=take(1),返回数据集中的第一个元素。
-* foreach：循环遍历数据集中的每个元素，运行相应的逻辑。
-* collect：将计算结果回收到Driver端。
-* 特点：将RDD类型的数据转化为Long，Seq类型
+
+* reduce：先对两个元素<K,V>进行reduce函数操作，然后将结果和迭代器取出的下一个元素<K, V>进行reduce函数操作，知道迭代器遍历完所有的元素，得到最后结果。在RDD中，先对每个分区中的所有元素<K，V>的集合分别进行reduceLeft。 每个分区形成的结果相当于一个元素<K，V>，再对这个结果集合进行reduceleft操作。
 
 ### Spark中的Scala算子实践
 

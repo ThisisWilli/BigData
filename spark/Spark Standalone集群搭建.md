@@ -1,4 +1,4 @@
-# Spark Standalone集群搭建
+# Spark Standalone模式
 
 ## 准备工作
 
@@ -37,6 +37,8 @@
 
 * 每个节点都修改文件`export JAVA_HOME=/root/software/jdk1.8.0_181/bin/java`
 
+* 勘误：应该是改成`export JAVA_HOME=/root/software/jdk1.8.0_181`**不然hadoop集群起不来**
+
 ### 安装Spark
 
 * 解压`[root@node01 software]# tar -zxvf ./spark-2.3.1-bin-hadoop2.6.tgz `
@@ -60,7 +62,19 @@
   export SPARK_WORKER_MEMORY=3g
   ```
 
-* 发送spark文件夹到node02，node03节点`[root@node01 sbin]# scp -r ./spark-2.3.1/ node03:`pwd``
+* 发送spark文件夹到node02，node03节点`[root@node01 sbin]# scp -r ./spark-2.3.1/ node03:`pwd```
+
+### 安装Spark客户端
+
+* `[root@node04 software]# mkdir spark`
+* `[root@node01 software]# scp -r spark-2.3.1/ node04:`pwd``
+* `[root@node04 spark-2.3.1]# cd conf/`
+* `[root@node04 conf]# rm -f ./slaves`
+* `[root@node04 conf]# rm -f ./spark-env.sh`
+
+## 对Spark集群进行操作
+
+### 运行Spark集群
 
 * 启动spark集群，首先要进入`/root/software/spark-2.3.1/sbin`目录下，再`[root@node01 sbin]# ./start-all.sh`
 
@@ -69,4 +83,10 @@
   ![](pic\sparkweb页面查看.png)
 
 * 关闭集群`[root@node01 sbin]# ./stop-all.sh`
+
+### Standalone模式提交任务
+
+* 启动集群
+
+
 

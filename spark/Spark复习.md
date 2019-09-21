@@ -65,5 +65,11 @@
   * foreach，count(结果会拿到Driver端)，collect，first，take
 * 持久化算子
 
+### 创建RDD方式
+
+* textfile
+* parallelize
+* makeRDD
+
 
 
