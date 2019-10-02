@@ -37,3 +37,8 @@
   * `join(xx, numpartition)`
   * `distinct`
 
+## Spark资源调度和任务调度
+
+![](pic\Spark资源调度和任务调度.png)
+
+* Spark中也有细粒度资源申请

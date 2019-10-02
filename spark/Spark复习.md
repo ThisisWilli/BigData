@@ -71,5 +71,109 @@
 * parallelize
 * makeRDD
 
+### 术语
+
+* 资源层面：master->worker->executor->threadpool
+* 任务层面：application->job->stage->tasks，task发送到threadpool中
+
+### RDD的款窄依赖
+
+* 宽依赖：父RDD与子RDD partition之间的关系是一对多的
+* 窄依赖：父RDD与子RDD partition直接按的关系是多对一的
+
+### Spark中job，stage，task之间的关系
+
+* job时提交给Spark的任务
+* stage时每个job处理过程要分为的几个阶段
+* Task是每一个job处理过程要分几为几次任务。Task是任务运行的最小单位。最终是要以task为单位运行在executor中。
+* 一个job任务可以有一个或多个stage，一个stage又可以有一个或多个task。所以一个job的task数量是  （stage数量 * task数量）的总和
+
+### Stage
+
+* 由一组并行的task组成
+* **RDD不存数据**，partition中存的是逻辑
+* RDD之间由宽依赖会划分stage
+* Spark计算模式为pipeline管道计算模式
+* 管道中的数据何时落地
+  * shuffle write时
+  * 对RDD进行持久化时
+* Stage中的finalRDD partition个数决定
+* 如何提高stage的并行度
+  * 增大RDD partition的个数
+  * reduceByKey：对相同key值的数据的value进行操作
+  * distinct：对RDD的数据进行去重，但是数据出来可能是无序的
+  * join：
+  * repartition：可以增加或者减少分区，但是多用于增加分区
+
+### Spark的资源调度和任务调度
+
+#### 资源调度
+
+* 1、集群启动，Worker向Master汇报资源，Master掌握集群资源
+* 2、当代码`new SparkContext()`时，会创建DAG Scheduler和Task Scheduler
+* 3、TaskScheduler向Master申请资源
+* 4、Master找到满足资源的节点，启动Executor
+* 5、Executor启动注册后，反向注册给Driver，Driver掌握了一批计算资源
+
+#### 任务调度
+
+* 6、action算子触发job，job中RDD之间的依赖关系形成DAG有向无环图
+* 7、DAGscheduler按照RDD之间的款窄依赖关系，**切割每个job，划分stage**，将stage以TaskSet形成TaskScheduler
+* 8、TaskScheduler遍历TaskSet，拿到一个个的Task，发送到Executor中的线程池中执行
+* 9、TaskScheduler监控task，回收结果
+
+#### 总结
+
+* 1、Task如果发送失败，由TaskScheduler重试，如果重试3次失败之后，依然失败，那么由DAGScheduler重试stage，重试4次之后，如果失败，那么stage所在的job就失败，application就失败了
+
+* 2、TaskScheduler不仅可以重试执行失败的task，还可以重试执行缓慢的task，这就是spark中的推测机制，默认是关闭的，对于ETL(extract transform load)业务，要关闭推测执行
+
+* 3、如果在task执行过程中，发现某些task执行非常缓慢，
+
+  * 1、是否有数据倾斜
+  * 2、是否开启的推测执行
+
+* ETL
+
+  * 将非结构化数据，进行结构化
+
+### 粗粒度资源和细粒度资源
+
+#### 粗粒度资源申请
+* 当application执行之前，首先将所有的资源申请完毕，如果申请不到一直等待，如果申请的到，执行application，task执行过程中就不需要自己申请资源，task执行快，application执行快
+* 优点：application执行快
+* 缺点：集群资源不能充分利用
+
+#### 细粒度资源申请
+
+* 当application执行之前，不会将所有的资源申请完毕，task执行时，自己申请资源，自己释放资源，task执行相对慢
+* 有点：集群资源可以充分利用
+* 缺点：application执行相对慢
+
+### Spark Submit参数
+
+* --master：指定提交模式
+* --deploy-mode：client还是cluster模式
+* --conf
+* --name
+* --jar：executor端依赖的一些jar包
+* --files：executor依赖的一些文件
+* --driver-cores
+* --driver-memory
+* --executor-cores
+* --executor-memory
+* --total-executor-cores
+* --num-executors
+
+### 源码分析
+
+* master启动
+* worker启动
+* 
+
+​    
+
+
+
 
 
