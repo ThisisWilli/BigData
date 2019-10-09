@@ -169,7 +169,35 @@
 
 * master启动
 * worker启动
-* 
+* Spark Submit提交任务
+  * Driver启动
+  * Driver向Master注册Application
+* Spark 资源调度
+  * Executor在集群中是分散启动的，利于数据处理的稳定
+  * 如果提交任务什么都不指定，集群中每台Worker为当前的application 启动一个Executor，这个Executor会使用当前节点的所有core和1G内存
+  * 如果想要一台Worker上启动多个Executor，要指定--executor-cores
+  * 提交任务指定 --total-executor-cores 会为当前application申请指定core个数的资源
+  * 启动Executor不仅和core有关还和内存有关 --executor-memory
+* Spark 任务调度
+  * 从一个action算子开始，实现看自己写的业务逻辑
+
+### 二次排序
+
+* Spark中大于两列的排序都叫二次排序
+* 封装对象，实现对象的排序，对象中的属性就是要排序的列(soryByKey)
+
+### 分组取topN
+
+* 原生的集合排序：有OOM风险
+* 定长数组
+
+### 广播变量
+
+
+
+### 累加器
+
+
 
 ​    
 

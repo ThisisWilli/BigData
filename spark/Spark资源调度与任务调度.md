@@ -1,10 +1,19 @@
-# Spark任务调度与任务调度
+# Spark资源调度与任务调度
 
-## 参考文章
+## 资源调度与任务调度示意图
+
+![](pic\Spark资源调度和任务调度.png)
+
+* 资源调度为1-6
+* 任务调度为7之后
+
+## 资源调度
+
+### 参考文章
 
 * https://zhuanlan.zhihu.com/p/28893155
 
-## 名词解释
+### 名词解释
 
 ![](pic\Spark中Driver.png)
 
@@ -14,20 +23,16 @@
 * Worker：集群中可以运行Application代码的节点。在Standalone模式中指的是通过slave文件配置的worker节点，在Spark on Yarn模式中指的就是NodeManager节点。
 * Task：在Executor进程中执行任务的工作单元，多个Task组成一个Stage
 * Job：包含多个Task组成的并行计算，是由Action行为触发的
-* Stage：每个Job会被拆分很多组Task，作为一个TaskSet，其名称为Stage
+* Stage：每个Job会被拆分很多组Task，作为一个TaskSet，其名称为Stage，**Job>Stage>Task**
 * DAGScheduler：**根据Job构建基于Stage的DAG**，并提交Stage给TaskScheduler，其划分Stage的依据是RDD之间的依赖关系
 * TaskScheduler：将TaskSet提交给Worker（集群）运行，**每个Executor运行什么Task就是在此处分配的**。
 * dispatcher:NettyRpcEnv中包含Dispatcher，主要针对服务端，帮助路由到正确的RpcEndpoint，并且调用其业务逻辑。
 * inbox:每个Endpoint都有一个Inbox，Inbox里面有一个InboxMessage的链表，InboxMessage有很多子类，可以是远程调用过来的RpcMessage，可以是远程调用过来的fire-and-forget的单向消息OneWayMessage，还可以是各种服务启动，链路建立断开等Message，这些Message都会在Inbox内部的方法内做模式匹配，调用相应的RpcEndpoint的函数（都是一一对应的）。
 * outbox:和Inbox类似，Outbox内部包含一个OutboxMessage的链表，OutboxMessage有两个子类，OneWayOutboxMessage和RpcOutboxMessage，分别对应调用RpcEndpoint的receive和receiveAndReply方法
 
-## 资源调度
-
-### 示意图
-
 ![](pic\Spark 资源调度源码和任务调度源码.png)
 
-## 创建RPC环境并进行通信
+### 创建RPC环境并进行通信
 
 * 在Master类中
 
@@ -87,7 +92,7 @@
 
 master启动，deploy，object中才有main方法,首先创建RPC，收消息，处理消息,有了RPC环境，master启动时先向RPC注册
 
-## Spark启动向master注册application
+### Spark启动向master注册application
 
 * Spark Submit中查看main方法，childmainclass
 
@@ -206,7 +211,7 @@ SparkContext中的createTaskScheduler
 
 createTaskScheduler中的initialize
 
-## Spark为当前application划分资源
+### Spark为当前application划分资源
 
 * 在Worker上启动executor
 
@@ -331,5 +336,73 @@ createTaskScheduler中的initialize
     }
   ```
 
-  
+## 任务调度
+
+以count算子为例，在RDD.scala中找到count算子，runJob中一直寻找下去，留意以下checkpoint
+
+```scala
+def runJob[T, U: ClassTag](
+      rdd: RDD[T],
+      func: (TaskContext, Iterator[T]) => U,
+      partitions: Seq[Int],
+      resultHandler: (Int, U) => Unit): Unit = {
+    if (stopped.get()) {
+      throw new IllegalStateException("SparkContext has been shutdown")
+    }
+    val callSite = getCallSite
+    val cleanedFunc = clean(func)
+    logInfo("Starting job: " + callSite.shortForm)
+    if (conf.getBoolean("spark.logLineage", false)) {
+      logInfo("RDD's recursive dependencies:\n" + rdd.toDebugString)
+    }
+    dagScheduler.runJob(rdd, cleanedFunc, partitions, callSite, resultHandler, localProperties.get)
+    progressBar.foreach(_.finishAll())
+    rdd.doCheckpoint()
+  }
+```
+
+在runJob向下寻找，关注submitJob中的post方法
+
+```scala
+def submitJob[T, U](
+      rdd: RDD[T],
+      func: (TaskContext, Iterator[T]) => U,
+      partitions: Seq[Int],
+      callSite: CallSite,
+      resultHandler: (Int, U) => Unit,
+      properties: Properties): JobWaiter[U] = {
+    // Check to make sure we are not launching a task on a partition that does not exist.
+    val maxPartitions = rdd.partitions.length
+    partitions.find(p => p >= maxPartitions || p < 0).foreach { p =>
+      throw new IllegalArgumentException(
+        "Attempting to access a non-existent partition: " + p + ". " +
+          "Total number of partitions: " + maxPartitions)
+    }
+
+    val jobId = nextJobId.getAndIncrement()
+    if (partitions.size == 0) {
+      // Return immediately if the job is running 0 tasks
+      return new JobWaiter[U](this, jobId, 0, resultHandler)
+    }
+
+    assert(partitions.size > 0)
+    val func2 = func.asInstanceOf[(TaskContext, Iterator[_]) => _]
+    val waiter = new JobWaiter(this, jobId, partitions.size, resultHandler)
+    eventProcessLoop.post(JobSubmitted(
+      jobId, rdd, func2, partitions.toArray, callSite, waiter,
+      SerializationUtils.clone(properties)))
+    waiter
+  }
+```
+
+```scala
+/**
+   * Put the event into the event queue. The event thread will process it later.
+   */
+  def post(event: E): Unit = {
+    eventQueue.put(event)
+  }
+```
+
+
 
