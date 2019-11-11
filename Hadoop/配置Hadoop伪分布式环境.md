@@ -146,4 +146,5 @@
 
 * 关闭集群
 
-  * ``` stop-dfs.sh```
+  * `stop-dfs.sh`
+

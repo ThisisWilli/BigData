@@ -47,7 +47,7 @@
 
 * 主备NameNode
 * 解决单点故障（属性，位置）
-  * 主NameNode对外提供服务，备NameNode同步主NameNode元数据，以待切换
+  * 主NameNode对外提供服务，**备NameNode同步主NameNode元数据**，以待切换
   * 所有DataNode同时向两个NameNode汇报数据块信息（位置）
   * JNN:集群（属性）
   * standby：备，完成了edits.log文件的合并产生新的image，推送回ANN
@@ -146,7 +146,7 @@
       </property>
   ```
 
-* 配置JournalNode的节点分享信息
+* 配置JournalNode的节点分享信息，两个NameNode 通过Journal Node相互通信
 
   ```xml
   	<property>

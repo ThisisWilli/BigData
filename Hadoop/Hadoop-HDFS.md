@@ -16,9 +16,9 @@
 * 文件元数据MetaData，文件数据：元数据，数据本身
 * （主）NameNode（只有一个）节点保存文件元数据：单节点 posix metadata size offset 每批文件的映射（存储的位置）维护存放在集群中的block文件的元数据信息block数量，大小，偏移量
 * （从）DataNode节点保存文件block数据：多节点，维护管理自己的节点之上的块文件
-* DataNode与NameNode之间保持心跳，DataNode要主动向NameNode上传block列表（原因：理论上来说DataNode会最先获知节点失效的信息）
+* DataNode与NameNode之间保持心跳，**DataNode要主动向NameNode上传block列表**（原因：理论上来说DataNode会最先获知节点失效的信息）
 * HdfsClient与DataNode交互元数据信息（cs）有利于数据的存与取，NameNode根据client的需求或者文件的大小，将数据切割存储到不同的DataNode上。只告诉具体地址，不带着去存或取，不然NameNode负载过大
-* DataNode利用服务器本地文件系统存储数据块
+* **DataNode利用服务器本地文件系统存储数据块**
 
 ## HDFS架构图
 
@@ -77,7 +77,7 @@ HDFS client 与NameNode交互之后，会与DataNode进行交互
 
 * 本地磁盘目录存储数据（Block），文件形式
 * 同时存储Block的元数据信息文件，元数据与本地block产生关联（MD5文件），在下载之前，先将MD5上传到NameNode进行验证（MD5解码操作），避免磁盘坏道下载坏文件
-* 启动DN时会向NN汇报block信息（是一种主动行为）
+* **启动DN时会向NN汇报block信息（是一种主动行为）**
 * 通过向NN发送心跳保持与其联系（3秒一次），如果NN 10分钟没有收到DN的心跳，则认为其已经lost，并copy其上的block到其它DN
 
 ## HDFS优点
