@@ -6,13 +6,13 @@
 
 通过网络连接到一个数据库中，是最经常使用到的模式
 
-![](pic\Hive搭建模式一.png)
+![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hive/Hive%E6%90%AD%E5%BB%BA%E6%A8%A1%E5%BC%8F%E4%B8%80.png )
 
 ### 模式二：远程非服务器模式
 
 用于非Java客户端访问元数据库，在服务器端启动MetaStoreServer，客户端利用Thrift协议通过MetaStoreServer访问元数据库
 
-![](pic\Hive搭建模式二.png)
+![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hive/Hive%E6%90%AD%E5%BB%BA%E6%A8%A1%E5%BC%8F%E4%BA%8C.png )
 
 ## 单用户模式安装
 

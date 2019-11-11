@@ -49,7 +49,7 @@
 
 - 和上面操作一样在node04中输入插入数据的命令，显示插入成功，说明'\001''\002''\003'(一般不推荐这么写)，与^A,^B,^C等价
 
-  ## 创建外部表
+## 创建外部表
 
 - `[root@node04 data]# hdfs dfs -mkdir /usr`
 
@@ -74,7 +74,7 @@
 
 ## 内部表和外部表的区别，应用场景？
 
-* 内部表数据由Hive自身管理，外部表数据由HDFS管理； 
+* **内部表数据由Hive自身管理，外部表数据由HDFS管理**； 
 
 * 内部表数据存储的位置是hive.metastore.warehouse.dir（默认：/user/hive/warehouse），外部表数据的存储位置由自己制定； 
 
@@ -137,7 +137,7 @@ Time taken: 0.265 seconds
 
 - 在node04中向表中插入数据`hive> load data local inpath '/root/data/data' into table psn5 partition(age=10);`并在web端查看分区标志
 
-  ![](F:/Java/BigData/Hive/pic/查看分区数据库.PNG)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hive/%E6%9F%A5%E7%9C%8B%E5%88%86%E5%8C%BA%E6%95%B0%E6%8D%AE%E5%BA%93.PNG )
 
 ### 建立双分区
 
@@ -160,7 +160,7 @@ map keys terminated by ':';
 
 导入数据`hive> load data local inpath '/root/data/data' into table psn6 partition(age=20, sex='man');`并在web查看
 
-![](F:/Java/BigData/Hive/pic/查看双分区数据库.PNG)
+![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hive/%E6%9F%A5%E7%9C%8B%E5%8F%8C%E5%88%86%E5%8C%BA%E6%95%B0%E6%8D%AE%E5%BA%93.PNG )
 
 ### 添加和删除分区
 
