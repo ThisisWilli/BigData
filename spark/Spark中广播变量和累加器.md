@@ -4,7 +4,7 @@
 
 ### 示意图
 
-![](pic\广播变量.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E5%B9%BF%E6%92%AD%E5%8F%98%E9%87%8F.png )
 
 * 每个Executor中的blockManager负责管理broadCastList
 
@@ -46,7 +46,7 @@
 
 ### 示意图
 
-![](pic\累计器.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E7%B4%AF%E8%AE%A1%E5%99%A8.png )
 
 ```scala
 object AccumulatorTest {

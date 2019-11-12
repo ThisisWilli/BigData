@@ -42,7 +42,7 @@
 
 * 启动完成之后再web页面进行查看`node01:60010`
 
-  ![](pic\web页面查看hbase.PNG)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hbase/web%E9%A1%B5%E9%9D%A2%E6%9F%A5%E7%9C%8Bhbase.PNG )
 
 * 进入hbase shell进行查看
 
@@ -267,7 +267,7 @@
 
   单节点启动命令`hbase-daemon.sh start master`
 
-  ![](pic\全分布是web页面查看.PNG)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Hbase/%E5%85%A8%E5%88%86%E5%B8%83%E6%98%AFweb%E9%A1%B5%E9%9D%A2%E6%9F%A5%E7%9C%8B.PNG )
 
   ### 查看数据
 

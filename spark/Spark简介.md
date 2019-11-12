@@ -2,7 +2,7 @@
 
 ## Spark生态系统
 
-![](pic\Spark生态系统.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E7%94%9F%E6%80%81%E7%B3%BB%E7%BB%9F.png )
 
 * 底层的Mesos可以理解为Yarn，spark要基于一个资源调用框架才能运行
 * Tachyon时基于内存的存储系统，HDFS是基于磁盘的存储系统

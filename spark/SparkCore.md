@@ -4,7 +4,7 @@
 
 ### 简介
 
-![](pic\Spark核心RDD.png)
+![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E6%A0%B8%E5%BF%83RDD.png )
 
 * RDD之间的依赖关系可以让他们相互还原
 * 分区器难理解
@@ -14,7 +14,7 @@
 
 ## Spark任务执行原理
 
-![](pic\Spark任务执行原理.png)
+![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E4%BB%BB%E5%8A%A1%E6%89%A7%E8%A1%8C%E5%8E%9F%E7%90%86.png )
 
 Driver和Worker是启动在节点上的进程，运行在JVM中的进程。
 
@@ -48,31 +48,31 @@ Spark算子大方向来说可以分为以下两类transformation算子(也叫**�
 
 * map：将一个RDD中的每个数据项，通过map中的函数映射变为一个新的元素。特点：输入一条，输出一条数据。
 
-  ![](pic\map算子示意图.png)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/map%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
   
 * flatMap：将原来 RDD 中的每个元素通过函数 f 转换为新的元素，并将生成的 RDD 的每个集合中的元素合并为一个集合，内部创建 FlatMappedRDD(this，sc.clean(f))        图 2表示RDD的一个分区 ，进 行 flatMap函 数 操 作，flatMap 中 传 入 的 函 数 为 f:T->U， T和 U 可以是任意的数据类型。将分区中的数据通过用户自定义函数 f 转换为新的数据。**外部大方框可以认为是一个 RDD 分区**，**小方框代表一个集合**。 V1、 V2、 V3 在一个集合作为 RDD 的一个数据项，可能存储为数组或其他容器，转换为V’1、 V’2、 V’3 后，**将原来的数组或容器结合拆散**，拆散的数据形成为 RDD 中的数据项
 
-  ![](pic\flatmap算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/flatmap%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
   
 * mapPartitions：mapPartitions 函数获取到**每个分区的迭代器**，在函数中通过这个分区整体的迭代器对整个分区的元 素进行操作。内部实现是生 成MapPartitionsRDD。图中方框表示一个RDD分区
 
-  ![](pic\mapPartition算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/mapPartition%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
   
 * glom：将每个分区形成一个数组，内部实现是返回的GlommedRDD
 
-  ![](pic\glom算子示意图.png)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/glom%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### 输入分区与输出分区多对一型
 
 * union：**需要保证两个RDD元素的数据类型相同**，返回的RDD数据类型和被合并的RDD数据元素类型相同，**并不进行去重操作**，保存所有元素，想去重可以使用distinct()，**使用++符号相当于union函数操作**左侧大方框代表两个 RDD，大方框内的小方框代表 RDD 的分区。右侧大方框代表合并后的 RDD，大方框内的小方框代表分区。含有V1、V2、U1、U2、U3、U4的RDD和含有V1、V8、U5、U6、U7、U8的RDD合并所有元素形成一个RDD。V1、V1、V2、V8形成一个分区，U1、U2、U3、U4、U5、U6、U7、U8形成一个分区。
 
-  ![](pic\笛卡尔运算原理.png)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E7%AC%9B%E5%8D%A1%E5%B0%94%E8%BF%90%E7%AE%97%E5%8E%9F%E7%90%86.png )
 
-  ![](pic\union算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/union%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * cartesian:对两个RDD内中的所有元素进行笛卡尔积操作，操作后，内部实现返回CartesianRDD。图中左侧两个方框代表两个RDD，大方框内的小方框代表RDD分区，右侧大方框代表合并后的RDD，方框内的小方框代表分区
 
-  ![](pic\cartesian算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/cartesian%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### 输入分区与输出分区多对多型
 
@@ -82,35 +82,35 @@ Spark算子大方向来说可以分为以下两类transformation算子(也叫**�
 
   (2)对数据map进行函数操作，最后在进行groupbykey分组操作`this.map(t => (cleanF(t), t)).groupByKey(p)`
 
-  ![](pic\groupby算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/groupby%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### 输出分区为输入分区子集型
 
 * filter：过滤符合条件的记录数，true保留，false过滤掉。
 
-  ![](pic\sample算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/filter%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
   
 * distinct：distinct将RDD中的元素进行去重操作，
 
-  ![](pic\distinct算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/distinct%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * subtract：subtract相当于集合的差操作，RDD1去除RDD1和RDD2交集中的所有元素
 
-  ![](pic\subtract算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/subtract%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * sample：随机抽样算子，根据传进去的小数按比例进行又放回或者无放回的抽样。
 
-  ![](pic\sample算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/sample%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * takeSample:按照采样个数进行采样，返回结果不再是RDD，而是相当于对采样后的数据进行collect()，返回结果的集合为单机的数组
 
-  ![](pic\takeSample算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/takeSample%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### Cache型
 
 * Cache算子：cache 将 RDD 元素从磁盘缓存到内存。 相当于 persist(MEMORY_ONLY) 函数的功能。
 
-  ![](pic\cache算子的示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/cache%E7%AE%97%E5%AD%90%E7%9A%84%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * persist算子
 
@@ -120,31 +120,31 @@ Spark算子大方向来说可以分为以下两类transformation算子(也叫**�
 
 * mapValues算子：针对(Key, Value)型数据中的Value进行Map操作，**而不对Key进行处理**，a=>a+2 代表对 (V1,1) 这样的 Key Value 数据对，数据只对 Value 中的 1 进行加 2 操作，返回结果为 3
 
-  ![](pic\mapValue算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/mapValue%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### 对单个RDD或两个RDD聚集
 
 * combineByKey：相当于将元素为 (Int， Int) 的 RDD 转变为了 (Int， Seq[Int]) 类型元素的 RDD。图 16中的方框代表 RDD 分区。如图，通过 combineByKey， 将 (V1,2)， (V1,1)数据合并为（ V1,Seq(2,1)）。
 
-  ![](pic\combineByKey算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/combineByKey%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * reduceByKey：将相同的Key根据相应的逻辑进行处理，比如说将两个值合并成一个值
 
-  ![](pic\reduceByKey算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/reduceByKey%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * partitionBy：是对**RDD进行分区操作**
 
-  ![](pic\partitionBy算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/partitionBy%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * Cogroup：将两个RDD进行协同划分，对在两个RDD中的Key-value类型的元素，每个RDD相同key的元素分别聚合成一个集合，并且返回两个RDD中对应Key的元素集合的迭代。图中大方框代表RDD，小方框代表RDD中的分区，将RDD1中的数据和RDD2中的数据进行合并
 
-  ![](pic\Cogroup算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Cogroup%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### 连接
 
 * join：join对两个需要连接的RDD进行cogroup函数操作，将**相同key的数据**能够放到同一个分区，在coGroup操作之后形成的新RDD对每个key下的元素进行**笛卡尔积的操作**，返回的结果再展平，对应key下的所有元组形成一个集合。最后返回RDD
 
-  ![](pic\join算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/join%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * leftOutJoin和rightOutJoin：LeftOutJoin（左外连接）和RightOutJoin（右外连接）相当于在join的基础上**先判断一侧的RDD元素是否为空**，如果为空，则填充为空。 如果不为空，则将数据进行连接运算，并返回结果。
 
@@ -162,7 +162,7 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
 
 * foreach：循环遍历数据集中的每个元素，运行相应的逻辑。
 
-  ![](pic\foreach算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/foreach%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 #### HDFS
 
@@ -175,7 +175,7 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
 
 * collectAsMap：collectAsMap对(K，V)型的RDD数据**返回一个单机HashMap**。 对于重复K的RDD元素，后面的元素覆盖前面的元素。
 
-  ![](pic\collectAsMap算子示意图.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/collectAsMap%E7%AE%97%E5%AD%90%E7%A4%BA%E6%84%8F%E5%9B%BE.png )
 
 * reduceByKeyLocally：实现的是先reduce再collectAsMap的功能，先对RDD的整体进行reduce操作，然后收集所有结果返回一个HashMap
 
@@ -277,7 +277,7 @@ Action类算子也是一类算子（函数）叫做行动算子，如foreach,col
 
 map和flatmap的区别
 
-![](pic\map和flatmap的区别.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/map%E5%92%8Cflatmap%E7%9A%84%E5%8C%BA%E5%88%AB.png )
 
 * filter算子
 

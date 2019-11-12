@@ -2,7 +2,7 @@
 
 ## Spark基于Standalone-client提交任务
 
-![](pic\Spark 基于Standalone-client 模式提交任务.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%20%E5%9F%BA%E4%BA%8EStandalone-client%20%E6%A8%A1%E5%BC%8F%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1.png )
 
 ### 提交命令
 
@@ -16,7 +16,7 @@
 
 ## Spark基于Standalone-cluster模式提交任务
 
-![](pic\Spark 基于Standalone-cluster 模式提交任务.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%20%E5%9F%BA%E4%BA%8EStandalone-cluster%20%E6%A8%A1%E5%BC%8F%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1.png )
 
 ### 提交命令
 
@@ -29,7 +29,7 @@
 
 ## 基于Yarn-client模式来提交任务
 
-![](pic\Spark 基于Yarn-client模式提交任务.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%20%E5%9F%BA%E4%BA%8EYarn-client%E6%A8%A1%E5%BC%8F%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1.png )
 
 ### 提交命令
 
@@ -124,7 +124,7 @@
 
 * 再次更改之后记得重启集群！再次进行测试，仍然失败，在resourcemanager的webui上查看显示内存爆了
 
-  ![](pic\Spark中client模式查找错误.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E4%B8%ADclient%E6%A8%A1%E5%BC%8F%E6%9F%A5%E6%89%BE%E9%94%99%E8%AF%AF.png )
 
 * 在yarn-site.xml中添加配置
 
@@ -143,11 +143,11 @@
 
 * 重启集群，再次提交任务，终于成功！
 
-  ![](pic\yarn改错之后提交成功.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/yarn%E6%94%B9%E9%94%99%E4%B9%8B%E5%90%8E%E6%8F%90%E4%BA%A4%E6%88%90%E5%8A%9F.png )
 
 ## Spark基于Yarn-cluster模式提交任务
 
-![](pic\Spark 基于Yarn-cluster 模式提交任务.jpg)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%20%E5%9F%BA%E4%BA%8EYarn-cluster%20%E6%A8%A1%E5%BC%8F%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1.jpg )
 
 ### 提交命令
 

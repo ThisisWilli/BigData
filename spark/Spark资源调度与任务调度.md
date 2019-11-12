@@ -2,7 +2,7 @@
 
 ## 资源调度与任务调度示意图
 
-![](pic\Spark资源调度和任务调度.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6%E5%92%8C%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6.png )
 
 * 资源调度为1-6
 * 任务调度为7之后
@@ -15,7 +15,7 @@
 
 ### 名词解释
 
-![](pic\Spark中Driver.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%E4%B8%ADDriver.png )
 
 * Application：表示你的应用程序
 * Driver：**表示main()函数**，创建SparkContext。由SparkContext负责与ClusterManager通信，进行资源的申请，任务的分配和监控等。程序执行完毕后关闭SparkContext
@@ -30,7 +30,7 @@
 * inbox:每个Endpoint都有一个Inbox，Inbox里面有一个InboxMessage的链表，InboxMessage有很多子类，可以是远程调用过来的RpcMessage，可以是远程调用过来的fire-and-forget的单向消息OneWayMessage，还可以是各种服务启动，链路建立断开等Message，这些Message都会在Inbox内部的方法内做模式匹配，调用相应的RpcEndpoint的函数（都是一一对应的）。
 * outbox:和Inbox类似，Outbox内部包含一个OutboxMessage的链表，OutboxMessage有两个子类，OneWayOutboxMessage和RpcOutboxMessage，分别对应调用RpcEndpoint的receive和receiveAndReply方法
 
-![](pic\Spark 资源调度源码和任务调度源码.png)
+![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/Spark%20%E8%B5%84%E6%BA%90%E8%B0%83%E5%BA%A6%E6%BA%90%E7%A0%81%E5%92%8C%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E6%BA%90%E7%A0%81.png )
 
 ### 创建RPC环境并进行通信
 
@@ -250,7 +250,7 @@ createTaskScheduler中的initialize
 
 * 判断是否可以启动，开始要每个节点的核，最终变成20
 
-  ![](pic\建立两个很重要的对象.png)
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E5%BB%BA%E7%AB%8B%E4%B8%A4%E4%B8%AA%E5%BE%88%E9%87%8D%E8%A6%81%E7%9A%84%E5%AF%B9%E8%B1%A1.png )
 
   ```scala
   private def scheduleExecutorsOnWorkers(

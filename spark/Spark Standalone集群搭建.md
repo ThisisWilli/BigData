@@ -80,7 +80,7 @@
 
 * 进入web端页面查看`node01:8080`
 
-  ![](pic\sparkweb页面查看.png)
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/sparkweb%E9%A1%B5%E9%9D%A2%E6%9F%A5%E7%9C%8B.png )
 
 * 关闭集群`[root@node01 sbin]# ./stop-all.sh`
 

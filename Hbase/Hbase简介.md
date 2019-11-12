@@ -29,7 +29,7 @@
 
 * HBase表中的每个列都属于某个列族,列族必须作为表模式定义的一部分预先给出,如`create 'test','course'`test为表明,course为列族名称
 * 列名以列族作为前缀,每个'列族'都可以有多个列成员(column);如`course:math,course:english`(course为列族,math,english为列名)新的列族成员(列)可以随后按需,动态加入
-* 权限控制、存储以及调优实在列族层面进行的
+* 权限控制、存储以及调优是在列族层面进行的
 * HBase把同一列族里面的数据存储在同一目录下,由几个文件保存,就是说也还是存在HDFS下
 
 ### TImestamp时间戳
