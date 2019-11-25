@@ -193,11 +193,40 @@
 
 ### 广播变量
 
-
+* 当Executor端使用到Driver端的变量时，如果不使用广播变量那么在每个Executor中有多少task，就会有多少变量副本
+* 如果使用广播变量，在每个Executor中只有一份Driver端的变量副本，可以大大节省Executor端内存
+* 注意点
+  * 不能将RDD广播出去
+  * 广播变量只能在Driver端定义，在Executor端使用，Executor端不能改变广播变量的值
 
 ### 累加器
 
+* 相当于集群中的统筹变量
+* 注意：累加器只能在Driver端定义，在Executor端使用，1.6版本不能在Executor中accumulator.value()获取累加器的值
 
+### Spark WEBUI
+
+* Spark-shell
+  * Spark-Scala的REPL
+  * 上传文件，Spark读取HDFS中文件
+* 点击job->stage->task
+* Jobs,Stages,Storage,Environment,SQL,Streaming
+
+### 端口
+
+* 50070：HDFS的web ui
+* 9000：HDFS读写端口
+* 8020：
+* 2181：zookeeper端口
+* 60010：Hbase
+* 6379：redis
+* 9083：hive中拿元数据
+* 8080：Spark中master
+* 8081：Spark中worker
+
+### Spark History-Server
+
+* 在客户端(node04)/Spark/conf/spark-defaults.conf中进行配置
 
 ​    
 
