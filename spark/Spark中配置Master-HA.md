@@ -37,3 +37,18 @@
 
 * 在客户端中提交任务进行测试`[root@node04 bin]# ./spark-submit --master spark://node01:7077,node02:7077 --class org.apache.spark.examples.SparkPi ../examples/jars/spark-examples_2.11-2.3.1.jar 1000`
 * 杀死node01中的Master进程，过一段时间之后可见node02成功接管
+
+## 验证
+
+* `[root@node04 bin]# ./spark-submit --master spark://node01:7077,node02:7077 --executor-cores 1 --class org.apache.spark.examples.SparkPi ../examples/jars/spark-examples_2.11-2.3.1.jar 5000`
+
+* 登录webui进行查看
+
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E8%A7%84%E5%AE%9Aexecutor-cores%E4%B8%AA%E6%95%B0.png )
+
+* `[root@node04 bin]# ./spark-submit --master spark://node01:7077,node02:7077 --executor-cores 1 --total-executor-cores 2 --class org.apache.spark.examples.SparkPi ../examples/jars/spark-examples_2.11-
+  2.3.1.jar 5000`
+
+* 登录webui进行查看
+
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E8%A7%84%E5%AE%9Atotal-executor.png  )

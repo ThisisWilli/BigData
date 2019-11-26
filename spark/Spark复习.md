@@ -147,7 +147,7 @@
 #### 细粒度资源申请
 
 * 当application执行之前，不会将所有的资源申请完毕，task执行时，自己申请资源，自己释放资源，task执行相对慢
-* 有点：集群资源可以充分利用
+* 优点：集群资源可以充分利用
 * 缺点：application执行相对慢
 
 ### Spark Submit参数
@@ -226,7 +226,13 @@
 
 ### Spark History-Server
 
-* 在客户端(node04)/Spark/conf/spark-defaults.conf中进行配置
+* 在客户端(node04)/Spark/conf/spark-defaults.conf中进行配置四个参数
+* 在客户端spark/sbin/start-history-server.sh启动历史日志服务器
+* 访问：node04:18080
+
+### Master-HA
+
+
 
 ​    
 
