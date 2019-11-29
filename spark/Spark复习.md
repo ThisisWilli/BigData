@@ -232,7 +232,138 @@
 
 ### Master-HA
 
+* 当提交任务启动Driver、向Master注册Application、申请Application资源 都要连接Master，如果Master不是Alive，就会失败
 
+* Master高可用
+
+  * 本地文件系统
+
+  * zookeeper
+
+    * 管理原数据
+    * 自动选举
+    * 搭建：
+      * 1、在Master-Alive中./conf/spark-env.sh中配置四个参数
+      * 2、找一台Master-Standyby配置./conf/spark-env.sh --SPARK_MASTER_HOST=node02
+      * 3、启动zookeeper
+      * 4、在Master-Alive中启动集群./start-all.sh
+      * 5、测试切换
+
+### Spark Shuffle
+
+* 两种shuffleManager，一种是sortShuffleManager，1.6之后默认使用SortShuffleManager，2.0之后HashShuffleManager被丢弃
+
+* HashShuffleManager
+
+  * 普通机制
+
+    * 产生磁盘小文件个数M*R
+    * 流程
+      * 1、map task处理完数据之后写往buffer缓存区，默认大小为32k，写往buffer缓冲区个数的与reduce task个数一致
+      * 2、缓冲区满32k溢写磁盘，每个buffer缓存区对应一个磁盘小文件
+      * 3、reduce端拉取数据
+    * 问题：产生磁盘小文件多
+      * shuffle write对象多
+      * shuffle read对象多
+      * 节点之间拉取数据的连接多，遇到网络连接不稳定导致拉取数据失败的概率大，会加大数据处理的时间
+
+  * 优化机制
+  * 产生磁盘小文件个数：C*R
+    * 流程
+      * 1、map task处理完数据之后写往buffer缓存区，默认大小为32k，写往buffer缓冲区个数的与reduce task个数一致
+      * 2、同一个core中的task公用一份buffer缓存区
+      * 3、缓冲区满32k溢写磁盘，每个buffer缓存区对应一个磁盘小文件
+      * 4、reduce端拉取数据
+    * 相对于普通情况，shuffle文件大大减少，当reduce task个数多，或者core的个数多的时候，产生磁盘小文件的个数还是比较大
+  
+  * SortShuffleManager
+  * 普通机制
+      * 产生磁盘小文件个数：2*M
+      * 过程
+        * 1、map task处理完数据先写往5M内存数据结构，默认有估算 机制，当估计内存不够
+        * 2、如果内存能够申请到，继续往内存中写数据，如果申请不到，溢写磁盘，溢写时有排序，每批次是1w条溢写
+        * 3、多次溢写的文件合并成两个文件，一个是索引文件，一个是数据文件
+        * 4、reduce task拉取数据
+    * bypass机制
+      * 产生磁盘小文件个数：2*M
+      * 过程
+        * 与普通机制相比，溢写磁盘没有排序
+      * 条件
+        * Spark算子没有map端的combine聚合时，可以使用bypass机制，如果有map端combine 想使用bypass也不能使用
+        * 开启bypass机制的条件：spark.shuffle.sort.bypassMergeThreshold，当reduce task小于这个参数时，默认开启bypass机制
+  
+###  Shuffle文件的寻址
+
+* 对象
+
+  * MapOutputTracker
+    * MapOutputTrackerMaster-Driver
+    * MapOutputTrackerMaster-Excutor
+  * BlockManager
+    * BlockManagerMaster-Driver
+      * DiskStore:管理磁盘数据
+      * MemoryStore：管理内存数据
+      * BlockTansferService：负责拉取数据
+    * BlockManagerSlaves-Executor
+      * DiskStore：管理磁盘数据
+      * MemoryStore：管理内存数据
+      * BlockTransferService：负责拉取数据
+
+* 过程
+
+  * 1、map task处理完数据，将数据结果和落地的磁盘小文件的位置信息封装到MapStatus对象中，通过Worker的MapOutputTrackerWorker汇报给Driver中的MapOutputTrackerMaster，Driver掌握的磁盘小文件的位置信息
+  * 2、reduce task拉取数据，首先向Driver要小磁盘文件的位置信息，Driver返回
+  * 3、reduce端连接数据所在的节点，由BlockTransferService拉取数据
+  * 4、BlockTransferService默认启动5个线程拉取数据，默认最多一次拉取48M
+  * 5、拉取来的数据放在了Executor中的shuffle聚合内存中
+
+* reduce OOM问题
+  * 1、减少拉取数据量
+  * 2、增大Executor端的整体内存
+  * 3、增大Executor shuffle聚合内存的比例
+
+### Spark内存管理
+
+* 静态内存管理和统一内存管理 1.6之后引入的统一内存管理
+
+* 使用哪种内存管理 选择参数
+
+* 静态内存管理
+
+  * 0.2：task运行
+  * 0.2
+    * 0.2：预留内存
+    * 0.8：shuffle聚合内存
+  * 0.6
+    * 0.1：预留内存
+    * 0.9
+      * 0.2：反序列化
+      * 0.8：RDD的缓存和广播变量
+
+* 统一内存管理
+
+  * 300M基础内存
+  * 总-300M
+    * 0.4(1.6版本-0.25)：task执行
+    * 0.6(1.6版本-0.75)
+      * 0.5：shuffle聚合内存
+      * 0.5：RDD缓存和广播
+
+  
+### Shuffle调优
+
+
+
+  
+
+  
+
+
+
+
+​    
+
+​    
 
 ​    
 
