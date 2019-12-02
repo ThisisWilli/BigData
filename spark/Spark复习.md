@@ -352,11 +352,80 @@
   
 ### Shuffle调优
 
+## SparkSQL
 
+### SparkSQL
+
+* 支持使用SQL查询分布式的数据
+* Hive中写的hql，底层解析成MRjob
+* SparkSQL发展过程：Hive->Shark->SparkSQL
+
+### Shark与SparkSQL
+
+* Shark中语法支持Hive中的语法
+* SparkSQL的出现是的Spark脱离Hive，解耦，不在依赖于Hive的解析优化
+* SparkSQL兼容所有Hive和Shark的语法
+* SparkSQL支持查询原生的RDD，还可以将结果拿回当作RDD使用
+
+### Spark on Hive-SparkSQL
+
+* Spark：解析优化，执行引擎
+* Hive：只是存储
+
+### Hive on Spark
+
+* Spark：执行引擎
+* Hive：解析优化，存储
+
+### DataFrame
+
+* **Spark Core底层操作的是RDD，SparkSQL底层操作的就是DataFrame**
+* DataFrame更像一张二维表格，有数据，也有列的信息
+* **想用SQL查询分布式数据，必须创建出来DataFrame**，有了DataFrame就可以注册视图，通过视图查询
+* 想要创建DataFrame，在Spark1.6中需要创建SQLContext，在Spark2.0+需要创建SparkSession
+
+### 谓词下推，SparkSQL优化job，使用到了谓词下推
+### SparkSQL 1.6与2.0之后版本的区别
+
+* 1、Spark1.6中要创建SQLContext(SparkContext)，Spark2.0+使用的SparkSession
+* 2、得到DataFrame之后注册临时表不一样，Spark1.6中是`df.registerTempTable("t1");`，Spark2.0+为`df.createOrReplaceTempView("t1");`，`df.createOrReplaceGlobalTempView("t2");`
+* 3、Spark2.0+引入DataSet
+  * 1、DataSet内部序列化机制与RDD不同，可以不用反序列化成对象调用
+  * 2、DataSet是强类型的，默认列名是value，可以操作上的方法，比RDD多，RDD有的算子，DataSet中都有
+
+### 创建DataFrame的方式
+
+#### 读取json格式的文件
+
+* 根据json的数据名自动成为列，列的类型会自动推断
+* 读取json格式的文件，列会按照Ascii排序
+* 读取json格式文件两种方式
+  * `sparksession.read().json(...)`
+  * `Session.read().format("json")`
+* `df.show(num)`默认显示前20行数据
+* 创建临时表的两种方式和区别`df.createOrReplaceTempView("t1");`，`df.createOrReplaceGlobalTempView("t2");`，前者可以跨Session
+* 读取嵌套格式的json数据，使用列名、属性即可
+* DataFrame结果拿回转化成RDD使用
+* 读取jsonArray格式的数据，explode()函数，导入隐式转换
+
+#### 读取json格式的RDD/DataSet
+
+* Spark1.6中读取 json格式的RDD，Spark2.0以上只有读取json格式的DataSet
 
   
 
-  
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

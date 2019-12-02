@@ -38,3 +38,21 @@
   * 通过非json格式的RDD来创建出来一个DataFrame
     * 通过反射的方式
     * 动态创建schema的方式 
+
+## SparkSQL 1.6与2.0之后版本的区别
+
+* 1、Spark1.6中要创建SQLContext(SparkContext)，Spark2.0+使用的SparkSession
+
+* 2、得到DataFrame之后注册临时表不一样，Spark1.6中是`df.registerTempTable("t1");`，Spark2.0+为`df.createOrReplaceTempView("t1");`，`df.createOrReplaceGlobalTempView("t2");`
+
+### 创建DataFrame的方式
+
+#### 读取json格式的文件
+
+* 根据json的数据名自动成为列，列的类型会自动推断
+* 读取json格式的文件，列会按照Ascii排序
+* 读取json格式文件两种方式
+  * `sparksession.read().json(...)`
+  * `Session.read().format("json")`
+* `df.show(num)`默认显示前20行数据
+* 创建临时表的两种方式和区别`df.createOrReplaceTempView("t1");`，`df.createOrReplaceGlobalTempView("t2");`，前者可以跨Session
