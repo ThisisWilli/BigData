@@ -412,7 +412,68 @@
 
 * Spark1.6中读取 json格式的RDD，Spark2.0以上只有读取json格式的DataSet
 
+#### 读取RDD创建DataFrame
+
+##### 1.反射的方式:
+
+* 1.首先将RDD转换成自定义类型的RDD
+
+* 2.rdd.toDF()
+
+* Spark1.6中java:sqlContext.createDataFrame(personRDD, Person.class)
+
+##### 2.动态创建Schema
+
+* 1.创建row类型的RDD
+* 2.使用spark.createDataFrame(rowRDD, structType)映射成DataFrame
+* 注意:动态创建的ROW中的数据的顺序要与创建Schema的顺序一致
+
+#### 读取parquet格式的数据加载DataFrame
+
+* 与读取json格式的数据一样
+
+#### 读取Mysql中的数据加载成DataFrame
+
+
+
+#### 读取Hive中的数据加载DataFrame
+
+* Spark1.6要使用HiveContext操作Hive数据
+* Spark2.0以上,SparkSession将SQLContext和HiveContext相当于封装,但是要读取Hive中的数据要开启Hive支持enableHiveSupport()
+
+### 保存DataFrame
+
+* 将DataFrame文件保存为parquet文件:`df.write(SaveMode.Append).format("parquet").save("./data/parquet")`
+* 将DataFrame保存到mysql表中
+
+### 配置Spark on Hive
+
+* 1.在客户端 ../conf/中创建hive-site.xml，让SparkSQL找到Hive原数据
+* 2.在hive的服务端启动metaStore服务，：hive --service metastore
+* 支持enableHiveSupport()，同时也要启动HDFS
+
+### UDF
+
+* user defined function，用户自定义函数
+* java:
+
+将普通RDD加载成DataFrame，1.通过动态创建schema，2.通过反射
+
+### UDAF
+
+* user defined aggregate function：用户自定义聚合函数
+* count,sum,min，特点是多对一，`select name, count(*) from table group by name`**多对一之后必须group by**
+
+## SparkStreaming
+
+
+
+
+
+
+
   
+
 
 
 
