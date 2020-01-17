@@ -83,7 +83,7 @@
 
 ### Spark中job，stage，task之间的关系
 
-* job时提交给Spark的任务
+* job是提交给Spark的任务
 * stage时每个job处理过程要分为的几个阶段
 * Task是每一个job处理过程要分几为几次任务。Task是任务运行的最小单位。最终是要以task为单位运行在executor中。
 * 一个job任务可以有一个或多个stage，一个stage又可以有一个或多个task。所以一个job的task数量是  （stage数量 * task数量）的总和
@@ -465,6 +465,96 @@
 * count,sum,min，特点是多对一，`select name, count(*) from table group by name`**多对一之后必须group by**
 
 ## SparkStreaming
+
+Spark中流式处理模块，SparkStreaming是7*24小时不间断运行，底层操作的是DStream，DStream底层是RDD
+
+### SparkStreaming喝Storm的区别
+
+* 1.SparkStreaming是微批处理，Storm是纯实时处理数据，SparkStreaming吞吐量大
+* 2.SparkStreaming擅长处理复杂业务，Storm擅长处理简单的汇总型业务
+* 3.Storm的事务相对于SparkStreaming完善，SparkStreaming现在也比较完善
+* 4.Storm支持动态的资源管理，Spark1.2之后也是支持**动态资源调度**
+
+### SparkStreaming读取数据流程
+
+* 1.SparkStreaming启动之后，首先会启动一个job，接受数据，每隔batchInterval将数据封装到batch中，这个batch又被封装到RDD中，RDD又被封装到一个DStream中
+* 2.SparkStreaming对生成的DStream进行处理，，DStream有自己的Transformation算子，懒执行，需要DStream的OutputOperator类算子触发执行
+* 3.如果batchInterval=5s，那么处理一批次数据时间小于5s，会造成集群资源不能充分利用
+* 4.如果batchInterval=5s，处理一批次数据的时间大于5s，会造成任务堆积
+
+### SparkStreaming读取Socket数据
+
+* nc -lk 9999通过一个端口发送数据
+* 创建StreamingContext的两种方式
+  * `val ssc: StreamingContext = new StreamingContext(conf, Durations.seconds(5))`
+* 如何调节batchInterval要结合webui调节(避免集群资源浪费或者任务堆积)
+* StreamingContext启动之后不能添加新的逻辑
+* StreamingContext.stop(默认true)将StreamingContext关闭时，将SparkContext也关闭，如果设置成false，关闭StreamingContext时，不回收SparkContext
+* StreamingContext.stop()关闭之后不能重新调用start方法启动
+
+### SparkStreaming算子
+
+* Transformation
+  * flatmap
+  * map
+  * filter
+  * ...
+  * updateStateByKey：
+    * 根据key更新从自SparkStreaming启动以来所有key的状态
+    * 需要设置checkpoint
+      * 如果batchInterval大于10s，batchInterval更新一次
+      * 如果batchInterval小于10s，10s更新一次
+  * reduceByKeyAndWindow
+    * reduceByKeyAndWindow(xxx, 窗口长度，滑动间隔)：每隔滑动间隔时间，将最近的窗口长度内的时间内的数据，做一次处理
+    * 窗口长度和滑动间隔必须时batchInterval的整数倍
+    * 普通机制：窗口内的每个批次都会重新计算
+    * 优化机制：要设置checkpoint，将上次窗口长度内的结果保存，加上新进来的批次，减去出去的批次
+  * window：window(窗口长度，滑动间隔)
+  * transform：可以拿到DStream中的RDD，对RDD进行转换，但是返回一个RDD，一定要对拿到的RDD使用action触发
+* OutputOperator
+  * foreachRDD
+    * 可以拿到DStream中的RDD，对RDD进行转换，但是一定要对拿到的RDD使用action触发
+    * foreachRDD代码内，拿到的RDD的代码外，是在Driver端执行，可以通过这个特点，做到动态改变广播变量
+  * print(xx)
+  * saveAsTextFile...
+  * saveAsHadoopFile
+  * saveAsObjectFile
+
+### Driver HA
+
+* SparkStreaming Driver要一直启动，如果挂掉，application就会挂掉
+* 实现DriverHA
+  * 1.提交任务时执行 --supervise
+  * 2.代码中`StreamingContext.getOrCreate("checkpoint目录", "创建StreamingContext的方法")`
+* checkpoint存储
+  * 1.DStream的配置
+  * 2.DStream逻辑
+  * 3.批次执行进度
+  * 4.offset(kafka相关)
+* Driver HA主要用到当停止SparkStreaming时，再次启动时，SparkStreaming可以接着上次消费的数据继续消费
+
+### Kafka
+
+#### 概念
+
+* kafka是一个分布式消息存储系统，默认消息是存储磁盘，默认保存7天
+* producer：消息生产者，两种机制，1.轮询，2.key的hash。如果key是null，就是轮询，如果key非null，就按照key的hash
+* broker：kafka集群的节点，broker之间没有主从关系，依赖于zookeeper协调，broker负责消息的读写和存储，每隔broker可以管理多个partition
+* topic
+  * 一类消息/消息队列
+  * 每个topic是由多个partition组成，为了提高并行度，由几个组成，可以创建指定
+* partition
+  * 是组成partition的单元，直接接触磁盘，消息是append到每个partition上的
+  * 每个partition内部消息是强有序的，FIFO
+  * 每个partition有副本，几个副本，创建topic时，可以指定
+* consumer
+  * 每个consumer都有自己的消费者组
+  * 每个消费者组在消费同一个topic时，这个topic中的数据只能被消费一次
+  * 不同的消费者组消费同一个topic互不影响
+  * kafka0.8之前，consumer自己在zookeeper中维护消费者offset，0.8之后，消费者offset是通过kafka集群来维护的
+* zookeeper存储原数据
+  * broker，topic，partition
+  * kafka0.8之前还可以存储消费者offset
 
 
 

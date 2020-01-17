@@ -13,6 +13,7 @@
 #### hive的本质是mapreduce
 
 * 延时性高，不能做到很快的响应
+* 是将HQL语句转换为mapreduce执行
 
 ### Hive的结构
 

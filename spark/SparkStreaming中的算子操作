@@ -1,0 +1,384 @@
+# Spark Streaming算子操作
+
+## updateStateByKey
+
+* updateStateByKey算子作用
+
+  *  为SparkStreaming中的每个key维护一个state状态，state类型可以是任意类型的，可以是一个自定义的对象，更新函数也可以是自定义的
+  * 通过更新函数对该key的状态不断更新，对于每个新的batch而言，SparkStreaming会在使用updateStateByKey的时候为已经存在的key进行state的状态更新
+
+* 使用updateStateByKey要开启checkpoint机制和功能
+
+* 如果batchInterval设置的时间小于10秒，那么10秒写入磁盘一份。如果batchInterval设置的时间大于10秒，那么就会batchInterval时间间隔写入磁盘一份  
+
+* 实现，**若要查看一段时间内socket发过来的所有数据，则应使用updateStateByKey算子**
+
+  ```scala
+  package streaming
+  
+  import org.apache.spark.SparkConf
+  import org.apache.spark.streaming.dstream.DStream
+  import org.apache.spark.streaming.{Durations, StreamingContext}
+  
+  /**
+   * \* project: SparkStudy
+   * \* package: streaming
+   * \* author: Willi Wei
+   * \* date: 2019-12-16 09:54:28
+   * \* description:
+   * \*/
+  object UpdateStateByKey {
+    def main(args: Array[String]): Unit = {
+      val conf = new SparkConf()
+      conf.setMaster("local[2]")
+      conf.setAppName("UpdateStateByKey")
+      val ssc = new StreamingContext(conf, Durations.seconds(5))
+      // 设置日志级别
+      ssc.sparkContext.setLogLevel("ERROR")
+      val lines = ssc.socketTextStream("node04", 9999)
+      val words: DStream[String] = lines.flatMap(line=>{line.split(" ")})
+      val pairWords = words.map(word=>{(word, 1)})
+  
+      /**
+       * 根据key更新状态，需要设置checkpoint来保存状态
+       * 默认key的状态在内存中有一份，在checkpoint中有一份
+       *
+       *  多久会将内存中的数据(每一个key所对应的状态)写入到磁盘上一份呢
+       *      如果你的batchInterval小于10s，那么10s内将内存中的数据写入到磁盘一份
+       *      如果batchInterval大于10s，那么就以batchInterval为准
+       *
+       *  这样做是为了防止频繁的写HDFS
+       */
+      ssc.checkpoint("data/streamingCheckPoint")
+  
+      /**
+       * currentValues:当前批次某个key对应所有的value组成的一个集合
+       * preValue：以往批次当前key对应的总状态值
+       */
+      val result: DStream[(String, Int)] = pairWords.updateStateByKey((currentValues: Seq[Int], preValue: Option[Int]) => {
+        var totalValues = 0
+        if (!preValue.isEmpty) {
+          totalValues += preValue.get
+        }
+        for (value <- currentValues) {
+          totalValues += value
+        }
+        Option(totalValues)
+      })
+      result.print()
+      ssc.start()
+      ssc.awaitTermination()
+      ssc.stop()
+  
+    }
+  }
+  ```
+
+  输入为
+
+  ```
+  [root@node04 ~]# nc -lk 9999
+  hello java
+  hello spark
+  ```
+
+  运行结果为
+
+  ```
+  -------------------------------------------
+  Time: 1576466060000 ms
+  -------------------------------------------
+  (hello,1)
+  (java,1)
+  
+  -------------------------------------------
+  Time: 1576466065000 ms
+  -------------------------------------------
+  (hello,1)
+  (java,1)
+  
+  -------------------------------------------
+  Time: 1576466070000 ms
+  -------------------------------------------
+  (hello,2)
+  (java,1)
+  (spark,1)
+  
+  -------------------------------------------
+  Time: 1576466075000 ms
+  -------------------------------------------
+  (hello,2)
+  (java,1)
+  (spark,1)
+  
+  -------------------------------------------
+  Time: 1576466080000 ms
+  -------------------------------------------
+  (hello,2)
+  (java,1)
+  (spark,1)
+  
+  -------------------------------------------
+  Time: 1576466085000 ms
+  -------------------------------------------
+  (hello,2)
+  (java,1)
+  (spark,1)
+  
+  -------------------------------------------
+  Time: 1576466090000 ms
+  -------------------------------------------
+  (hello,2)
+  (java,1)
+  (spark,1)
+  ```
+
+## 窗口操作
+
+* 下图是未优化的窗口操作图
+
+  ![](https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E4%BC%98%E5%8C%96%E5%89%8D%E7%9A%84%E7%AA%97%E5%8F%A3%E6%93%8D%E4%BD%9C.png )
+
+* 优化后的窗口操作如下所示
+
+  ![]( https://willipic.oss-cn-hangzhou.aliyuncs.com/Spark/%E4%BC%98%E5%8C%96%E5%90%8E%E7%9A%84%E7%AA%97%E5%8F%A3%E6%93%8D%E4%BD%9C.png )
+
+* 窗口长度和滑动间隔必须是batchInterval的整数倍，如果不是整数倍会检测报错
+
+* 优化前窗口操作实现
+
+  ```scala
+  package streaming
+  
+  import org.apache.spark.SparkConf
+  import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
+  import org.apache.spark.streaming.{Durations, StreamingContext}
+  
+  /**
+   * \* project: SparkStudy
+   * \* package: streaming
+   * \* author: Willi Wei
+   * \* date: 2019-12-16 10:26:58
+   * \* description:
+   * \*/
+  /**
+   * SparkStreaming窗口操作
+   * reduceByKeyAndWindow
+   * 每隔窗口滑动间隔时间计算窗口长度内的数据，按照指定的方式处理，只看一段时间内的数据
+   */
+  object WindowOperator {
+    def main(args: Array[String]): Unit = {
+      val conf = new SparkConf()
+      conf.setAppName("windowOperator")
+      conf.setMaster("local[2]")
+      val ssc = new StreamingContext(conf, Durations.seconds(5))
+      ssc.sparkContext.setLogLevel("Error")
+      val lines: ReceiverInputDStream[String] = ssc.socketTextStream("node04", 9999)
+      val words: DStream[String] = lines.flatMap(line=>{line.split(" ")})
+      val pairWords: DStream[(String, Int)] = words.map(word=>{(word, 1)})
+  
+      /**
+       * 窗口操作的普通机制
+       *
+       * 滑动间隔和窗口长度必须是batchInterval的整数倍
+       */
+        // 每隔5s计算过去15s内的数据
+      val windowResult: DStream[(String, Int)] =
+        pairWords.reduceByKeyAndWindow((v1:Int, v2:Int)=>{v1 + v2}, Durations.seconds(15), Durations.seconds(5))
+      windowResult.print()
+      ssc.start()
+      ssc.awaitTermination()
+      ssc.stop()
+    }
+  }
+  
+  ```
+
+  输出为，只会保留之前15秒之内窗口接受到的数据
+
+  ```
+  -------------------------------------------
+  Time: 1576479855000 ms
+  -------------------------------------------
+  (hello,1)
+  (world,1)
+  
+  -------------------------------------------
+  Time: 1576479860000 ms
+  -------------------------------------------
+  (hello,1)
+  (world,1)
+  
+  -------------------------------------------
+  Time: 1576479865000 ms
+  -------------------------------------------
+  (hello,1)
+  (world,1)
+  
+  -------------------------------------------
+  Time: 1576479870000 ms
+  -------------------------------------------
+  
+  
+  ```
+
+* 优化后的窗口设置
+
+  ```scala
+  package streaming
+  
+  import org.apache.spark.SparkConf
+  import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
+  import org.apache.spark.streaming.{Durations, StreamingContext}
+  
+  /**
+   * \* project: SparkStudy
+   * \* package: streaming
+   * \* author: Willi Wei
+   * \* date: 2019-12-16 10:26:58
+   * \* description:
+   * \*/
+  /**
+   * SparkStreaming窗口操作
+   * reduceByKeyAndWindow
+   * 每隔窗口滑动间隔时间计算窗口长度内的数据，按照指定的方式处理，只看一段时间内的数据
+   */
+  object WindowOperator {
+    def main(args: Array[String]): Unit = {
+      val conf = new SparkConf()
+      conf.setAppName("windowOperator")
+      conf.setMaster("local[2]")
+      val ssc = new StreamingContext(conf, Durations.seconds(5))
+      ssc.sparkContext.setLogLevel("Error")
+      val lines: ReceiverInputDStream[String] = ssc.socketTextStream("node04", 9999)
+      val words: DStream[String] = lines.flatMap(line=>{line.split(" ")})
+      val pairWords: DStream[(String, Int)] = words.map(word=>{(word, 1)})
+  
+      ssc.checkpoint("data/streamingCheckPoint")
+      /**
+       * 窗口操作优化的机制，加的是新进来批次的值，减的是之前批次的值
+       */
+      val windowResult: DStream[(String, Int)] =
+        pairWords.reduceByKeyAndWindow((v1:Int, v2:Int)=>{v1 + v2},
+                                        (v1:Int, v2:Int)=>{v1-v2},
+                                        Durations.seconds(15),
+                                        Durations.seconds(5))
+  
+  
+      windowResult.print()
+      ssc.start()
+      ssc.awaitTermination()
+      ssc.stop()
+    }
+  }
+  
+  ```
+
+  输出结果为，可见会保留之前运行结果状态，仅舍弃数据
+
+  ```
+  -------------------------------------------
+  Time: 1576480730000 ms
+  -------------------------------------------
+  
+  -------------------------------------------
+  Time: 1576480735000 ms
+  -------------------------------------------
+  (hello,1)
+  (hadoop,1)
+  
+  -------------------------------------------
+  Time: 1576480740000 ms
+  -------------------------------------------
+  (hello,1)
+  (hadoop,1)
+  
+  -------------------------------------------
+  Time: 1576480745000 ms
+  -------------------------------------------
+  (hello,1)
+  (hadoop,1)
+  
+  -------------------------------------------
+  Time: 1576480750000 ms
+  -------------------------------------------
+  (hello,0)
+  (hadoop,0)
+  
+  -------------------------------------------
+  Time: 1576480755000 ms
+  -------------------------------------------
+  (hello,0)
+  (hadoop,0)
+  
+  -------------------------------------------
+  Time: 1576480760000 ms
+  -------------------------------------------
+  (hello,0)
+  (hadoop,0)
+  ```
+
+## transform算子
+
+与foreachRDD类似，但是transform是对RDD进行操作，最后要返回RDD
+
+* 实现
+
+  ```scala
+  package streaming
+  
+  import org.apache.spark.SparkConf
+  import org.apache.spark.broadcast.Broadcast
+  import org.apache.spark.rdd.RDD
+  import org.apache.spark.streaming.dstream.{DStream, ReceiverInputDStream}
+  import org.apache.spark.streaming.{Durations, StreamingContext}
+  
+  /**
+   * \* project: SparkStudy
+   * \* package: streaming
+   * \* author: Willi Wei
+   * \* date: 2019-12-16 15:47:27
+   * \* description:
+   * \*/
+  object TransformBlackList {
+    def main(args: Array[String]): Unit = {
+      val conf = new SparkConf()
+      conf.setAppName("transform")
+      conf.setMaster("local[2]")
+      val ssc = new StreamingContext(conf, Durations.seconds(5))
+      ssc.sparkContext.setLogLevel("Error")
+  
+      /**
+       * 广播黑名单
+       */
+      val blackList: Broadcast[List[String]] = ssc.sparkContext.broadcast(List[String]("zhangsan", "lisi"))
+  
+      /**
+       *从实时数据中发现数据的第二位是黑名单，则过滤掉
+       */
+      val lines: ReceiverInputDStream[String] = ssc.socketTextStream("node04", 9999)
+      val pairLines: DStream[(String, String)] = lines.map(line=>{(line.split(" ")(1), line)})
+      /**
+       * transform算子可以拿到DStream中的RDD， 对RDD使用RDD的算子操作，但是最后要返回RDD，返回的RDD又被封装到一个DStream
+       *
+       * transform中拿到的RDD的算子外，代码是在Driver端执行的，可以做到动态的改变广播变量
+       */
+      val resultDStream: DStream[String] = pairLines.transform(pairRDD => {
+        println("++++++++++++Driver Code++++++++++++")
+        val filterRDD: RDD[(String, String)] = pairRDD.filter(tp => {
+          val nameList: List[String] = blackList.value
+          !nameList.contains(tp._1)
+        })
+        val returnRDD = filterRDD.map(tp => tp._2)
+        returnRDD
+      })
+      resultDStream.print()
+      ssc.start()
+      ssc.awaitTermination()
+      ssc.stop()
+    }
+  }
+  ```
+
+  当输入包含zhangsan，lisi，那么这行数据将会被过滤掉
+
