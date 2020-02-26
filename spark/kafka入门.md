@@ -1,6 +1,6 @@
 # Kafka
 
-## 概念
+## 概念 
 
 * kafka是一个分布式消息存储系统，默认消息是存储磁盘，默认保存7天
 * producer：消息生产者，两种机制，1.轮询，2.key的hash。如果key是null，就是轮询，如果key非null，就按照key的hash
